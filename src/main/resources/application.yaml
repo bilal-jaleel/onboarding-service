@@ -5,11 +5,14 @@ spring:
     hibernate:
       ddl-auto: update
     defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
   datasource:
     platform: postgres
     url: jdbc:postgresql://localhost:5432/onboarding
     username: postgres
     password: password
     driverClassName: org.postgresql.Driver
-    data: classpath:data.sql,classpath:dummy-data.sql
+    initialization-mode: always
   thread-executor: virtual

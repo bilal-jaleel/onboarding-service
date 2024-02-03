@@ -46,7 +46,7 @@ Before you begin, ensure you have the following installed:
 1. Run postgres container locally
 
 ```bash
-sudo docker run -v /var/lib/postgres-container/:/var/lib/postgresql/data  -p 5432:5432  -e POSTGRES_PASSWORD=<YOUR PASSWORD HERE> -d postgres
+sudo docker run -v /var/lib/postgres-container/:/var/lib/postgresql/data  -p 5432:5432  -e POSTGRES_PASSWORD=password -d postgres
 ```
 
 2. Create the database on the container
@@ -67,15 +67,4 @@ mvn spring-boot:run
 
 1. Process Flow
 ![Process flow](./docs/Process%20Diagram.png)
-
-## Usage
-
-Configure the application properties, including the database connection details, in src/main/resources/application.properties or src/main/resources/application.yml.
-Run the application:
-
-```bash
-./mvnw spring-boot:run
-```
-
-
 
