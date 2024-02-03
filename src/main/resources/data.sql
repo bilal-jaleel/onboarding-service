@@ -1,5 +1,5 @@
-insert into rides(id, manufacturer, model) values
-(1, 'Toyota', 'Supra'),
-(2, 'Mitsubushi', 'Lancer'),
-(3, 'Nissan', 'GTR')
+insert into vehicles(id, manufacturer, model, type) values
+(1, 'Toyota', 'Etios', 'Sedan'),
+(2, 'Toyota', 'Innova', 'XL'),
+(3, 'Nissan', 'GTR', 'Sports')
 ON CONFLICT(id) DO NOTHING;

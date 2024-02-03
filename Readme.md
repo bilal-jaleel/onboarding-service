@@ -1,6 +1,6 @@
 # Driver Onboarding Application
 
-Welcome to the Driver Onboarding Application! This application is designed to streamline the onboarding process for new drivers joining our ride-sharing service.
+Welcome to the Driver Onboarding Application! This application is designed to streamline the onboarding process for new drivers joining our vehicle-sharing service.
 
 ## Table of Contents
 

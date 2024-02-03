@@ -8,12 +8,12 @@ import lombok.*;
 import java.util.List;
 
 @Entity
-@Table(name = "rides")
+@Table(name = "vehicles")
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
-public class RideEntity {
+public class VehicleEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -21,14 +21,15 @@ public class RideEntity {
 
     String manufacturer;
     String model;
+    String type;
 
     @JsonManagedReference
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "ride")
-    List<PendingDriverOnboardingEntity> pendingDriverOnboardingEntities;
+    @OneToMany(mappedBy = "vehicleEntity")
+    List<OnboardingEntity> onboardingEntities;
 
     @JsonManagedReference
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "ride")
-    List<OnboardedDriverEntity> onboardedDriverEntities;
+    @OneToMany(mappedBy = "vehicleEntity")
+    List<DriverEntity> driverEntities;
 }

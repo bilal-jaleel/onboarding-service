@@ -1,4 +1,6 @@
 package com.acme.onboarding.controller.request;
 
-public record MarkDriverReadyRequest(Integer id) {
+import jakarta.validation.constraints.NotNull;
+
+public record MarkDriverReadyRequest(@NotNull Integer id) {
 }

@@ -1,9 +1,9 @@
 package com.acme.onboarding.utils;
 
-import com.acme.onboarding.database.entity.PendingDriverOnboardingEntity;
-import com.acme.onboarding.database.entity.RideEntity;
+import com.acme.onboarding.database.entity.OnboardingEntity;
+import com.acme.onboarding.database.entity.VehicleEntity;
 import com.acme.onboarding.service.model.Driver;
-import com.acme.onboarding.service.model.Ride;
+import com.acme.onboarding.service.model.Vehicle;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,35 +14,35 @@ public class MapperTest {
     @Test
     public void testMapDriverToEntity() {
         Driver driver = DummyData.getDriver();
-        PendingDriverOnboardingEntity pendingDriverOnboardingEntity = Mapper.mapDriverToEntity(driver);
-        assertEquals(pendingDriverOnboardingEntity.getName(), driver.name());
-        assertEquals(pendingDriverOnboardingEntity.getEmail(), driver.email());
-        assertEquals(pendingDriverOnboardingEntity.getMobile(), driver.mobile());
+        OnboardingEntity onboardingEntity = Mapper.mapDriverToOnboardingEntity(driver);
+        assertEquals(onboardingEntity.getName(), driver.name());
+        assertEquals(onboardingEntity.getEmail(), driver.email());
+        assertEquals(onboardingEntity.getMobile(), driver.mobile());
     }
 
     @Test
     public void testMapRideToEntity() {
-        Ride ride = DummyData.getRide();
-        RideEntity rideEntity = Mapper.mapRideToEntity(ride);
-        assertEquals(ride.manufacturer(), rideEntity.getManufacturer());
-        assertEquals(ride.model(), rideEntity.getModel());
+        Vehicle vehicle = DummyData.getVehicle();
+        VehicleEntity vehicleEntity = Mapper.mapVehicleToEntity(vehicle);
+        assertEquals(vehicle.manufacturer(), vehicleEntity.getManufacturer());
+        assertEquals(vehicle.model(), vehicleEntity.getModel());
     }
 
     @Test
     public void testMapEntityToRide() {
-        RideEntity rideEntity = DummyData.getRideEntity();
-        Ride ride= Mapper.mapEntityToRide(rideEntity);
-        assertEquals(ride.manufacturer(), rideEntity.getManufacturer());
-        assertEquals(ride.model(), rideEntity.getModel());
+        VehicleEntity vehicleEntity = DummyData.getVehicleEntity();
+        Vehicle vehicle = Mapper.mapEntityToVehicle(vehicleEntity);
+        assertEquals(vehicle.manufacturer(), vehicleEntity.getManufacturer());
+        assertEquals(vehicle.model(), vehicleEntity.getModel());
     }
 
     @Test
     public void testMapEntityToDriver() {
-        PendingDriverOnboardingEntity pendingDriverOnboardingEntity = DummyData.getDriverEntity(null, null,null);
-        Driver driver = Mapper.mapEntityToDriver(pendingDriverOnboardingEntity);
-        assertEquals(pendingDriverOnboardingEntity.getName(), driver.name());
-        assertEquals(pendingDriverOnboardingEntity.getEmail(), driver.email());
-        assertEquals(pendingDriverOnboardingEntity.getMobile(), driver.mobile());
+        OnboardingEntity onboardingEntity = DummyData.getOnboardingEntity(null, null,null);
+        Driver driver = Mapper.mapOnboardingEntityToDriver(onboardingEntity);
+        assertEquals(onboardingEntity.getName(), driver.name());
+        assertEquals(onboardingEntity.getEmail(), driver.email());
+        assertEquals(onboardingEntity.getMobile(), driver.mobile());
     }
 }
 

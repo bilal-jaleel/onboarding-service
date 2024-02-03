@@ -2,8 +2,8 @@ package com.acme.onboarding.service.model;
 
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Setter;
 
 @Builder
-public record Driver(String name, String email, String mobile, Address address, Ride ride) {
+public record Driver(Integer id,String name, String email, String mobile, Address address, Vehicle vehicle) {
 }

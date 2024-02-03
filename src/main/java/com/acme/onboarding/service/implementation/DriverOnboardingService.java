@@ -1,58 +1,62 @@
 package com.acme.onboarding.service.implementation;
 
-import com.acme.onboarding.database.entity.OnboardedDriverEntity;
-import com.acme.onboarding.database.entity.PendingDriverOnboardingEntity;
-import com.acme.onboarding.database.entity.RideEntity;
+import com.acme.onboarding.database.entity.DriverEntity;
+import com.acme.onboarding.database.entity.OnboardingEntity;
+import com.acme.onboarding.database.entity.VehicleEntity;
 import com.acme.onboarding.database.enums.ModuleStatus;
 import com.acme.onboarding.database.enums.OnboardingModule;
-import com.acme.onboarding.database.repository.OnboardedDriverRepository;
-import com.acme.onboarding.database.repository.PendingDriverOnboardingRepository;
-import com.acme.onboarding.database.repository.RideRepository;
-import com.acme.onboarding.exceptions.ValidationException;
+import com.acme.onboarding.database.repository.DriverRepository;
+import com.acme.onboarding.database.repository.OnboardingRepository;
+import com.acme.onboarding.database.repository.VehicleRepository;
 import com.acme.onboarding.service.interfaces.IDriverOnboardingService;
 import com.acme.onboarding.service.model.Driver;
 import com.acme.onboarding.utils.Mapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
+import jakarta.validation.ValidationException;
 
 @Service
 @Slf4j
 public class DriverOnboardingService implements IDriverOnboardingService {
 
     @Autowired
-    PendingDriverOnboardingRepository pendingOnboardingRepository;
+    OnboardingRepository onboardingRepository;
 
     @Autowired
-    RideRepository rideRepository;
+    VehicleRepository vehicleRepository;
 
     @Autowired
-    OnboardedDriverRepository onboardedDriverRepository;
+    DriverRepository driverRepository;
 
     @Override
     public Driver register(Driver driver) {
-        RideEntity rideEntity = rideRepository.findByManufacturerAndModel(driver.ride().manufacturer(), driver.ride().model());
-        PendingDriverOnboardingEntity pendingDriverOnboardingEntity = Mapper.mapDriverToEntity(driver);
+        VehicleEntity vehicleEntity = vehicleRepository.findByManufacturerAndModel(driver.vehicle().manufacturer(), driver.vehicle().model());
+        OnboardingEntity onboardingEntity = Mapper.mapDriverToOnboardingEntity(driver);
 
-        pendingDriverOnboardingEntity.setRide(rideEntity);
-        pendingDriverOnboardingEntity.setModule(OnboardingModule.DOCUMENT_COLLECTION);
-        pendingDriverOnboardingEntity.setModuleStatus(ModuleStatus.IN_PROGRESS);
+        onboardingEntity.setVehicleEntity(vehicleEntity);
+        onboardingEntity.setModule(OnboardingModule.DOCUMENT_COLLECTION);
+        onboardingEntity.setModuleStatus(ModuleStatus.IN_PROGRESS);
 
-        pendingOnboardingRepository.save(pendingDriverOnboardingEntity);
+        OnboardingEntity registerdOnboardingEntity = onboardingRepository.save(onboardingEntity);
         // Todo: Trigger Driver Onboarding Procedures
-        return driver;
+        return Mapper.mapOnboardingEntityToDriver(registerdOnboardingEntity);
     }
 
     @Override
-    public PendingDriverOnboardingEntity getDriverOnboardingStatus(Integer id) {
-        return pendingOnboardingRepository.getReferenceById(id);
+    public OnboardingEntity getDriverOnboardingStatus(Integer id) {
+        return onboardingRepository.getReferenceById(id);
     }
 
     @Override
-    public boolean markModuleStatusAndTriggerNextModule(int driverID, OnboardingModule module, ModuleStatus status) {
-        PendingDriverOnboardingEntity currentDriverOnboardingEntity = pendingOnboardingRepository.getReferenceById(driverID);
+    public void updateModuleStatus(int driverID, OnboardingModule module, ModuleStatus status) {
+        OnboardingEntity currentDriverOnboardingEntity = onboardingRepository.getReferenceById(driverID);
+
+        //If the status being updated is to in_progress, that is invalid
+        if(status == ModuleStatus.IN_PROGRESS){
+            log.error("The module is already in progress");
+            throw new ValidationException("The module is already in progress");
+        }
 
         //If the driver is already onboarded, then break
         if (currentDriverOnboardingEntity.getModule() == OnboardingModule.ONBOARDED) {
@@ -68,11 +72,10 @@ public class DriverOnboardingService implements IDriverOnboardingService {
             throw new ValidationException("Invalid transition to module");
         }
 
-
         // If the current module has failed, then update the status and return
         if (status == ModuleStatus.FAILED) {
-            int updatedRows = pendingOnboardingRepository.updateModuleStatusForDriver(driverID, module, status);
-            return updatedRows == 1;
+            onboardingRepository.updateModuleStatusForDriver(driverID, module, status);
+            return;
         }
 
         OnboardingModule nextPossibleModule =
@@ -83,26 +86,25 @@ public class DriverOnboardingService implements IDriverOnboardingService {
         }
 
         // mark & trigger next module
-        int updatedRows = pendingOnboardingRepository.updateModuleStatusForDriver(driverID, nextPossibleModule, nextModuleStatus);
-        return updatedRows == 1;
+        onboardingRepository.updateModuleStatusForDriver(driverID, nextPossibleModule, nextModuleStatus);
     }
 
     @Override
     public void markDriverReady(int driverID) {
-        PendingDriverOnboardingEntity pendingDriverOnboardingEntity = pendingOnboardingRepository.getReferenceById(driverID);
-        if(pendingDriverOnboardingEntity.getModule() != OnboardingModule.ONBOARDED){
+        OnboardingEntity onboardingEntity = onboardingRepository.getReferenceById(driverID);
+        if(onboardingEntity.getModule() != OnboardingModule.ONBOARDED){
            throw new ValidationException("The driver must be onboarded before he can be ready to start a ride");
         }
-        OnboardedDriverEntity onboardedDriverEntity = OnboardedDriverEntity.builder()
-                .email(pendingDriverOnboardingEntity.getEmail())
-                .address(pendingDriverOnboardingEntity.getAddress())
-                .mobile(pendingDriverOnboardingEntity.getMobile())
-                .name(pendingDriverOnboardingEntity.getName())
-                .ride(pendingDriverOnboardingEntity.getRide())
-                .pendingDriverOnboardingEntity(pendingDriverOnboardingEntity)
+        DriverEntity driverEntity = DriverEntity.builder()
+                .email(onboardingEntity.getEmail())
+                .address(onboardingEntity.getAddress())
+                .mobile(onboardingEntity.getMobile())
+                .name(onboardingEntity.getName())
+                .vehicleEntity(onboardingEntity.getVehicleEntity())
+                .onboardingEntity(onboardingEntity)
                 .build();
 
-        onboardedDriverRepository.save(onboardedDriverEntity);
+        driverRepository.save(driverEntity);
     }
 
 

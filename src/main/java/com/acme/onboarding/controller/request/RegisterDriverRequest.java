@@ -1,7 +1,14 @@
 package com.acme.onboarding.controller.request;
 
 import com.acme.onboarding.service.model.Address;
-import com.acme.onboarding.service.model.Ride;
+import com.acme.onboarding.service.model.Vehicle;
+import jakarta.validation.Valid;
+import lombok.Builder;
+import jakarta.validation.constraints.NotNull;
 
-public record RegisterDriverRequest(String name, String email, String mobile, Address address, Ride ride) {
+@Builder
+public record RegisterDriverRequest(@NotNull String name,
+                                    @NotNull  String email,
+                                    @NotNull String mobile,
+                                    @Valid Address address, @Valid Vehicle vehicle) {
 }

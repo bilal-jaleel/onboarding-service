@@ -1,14 +1,14 @@
 package com.acme.onboarding.utils;
 
-import com.acme.onboarding.database.entity.OnboardedDriverEntity;
-import com.acme.onboarding.database.entity.PendingDriverOnboardingEntity;
-import com.acme.onboarding.database.entity.RideEntity;
+import com.acme.onboarding.controller.request.RegisterDriverRequest;
+import com.acme.onboarding.database.entity.DriverEntity;
+import com.acme.onboarding.database.entity.OnboardingEntity;
+import com.acme.onboarding.database.entity.VehicleEntity;
 import com.acme.onboarding.database.enums.ModuleStatus;
 import com.acme.onboarding.database.enums.OnboardingModule;
-import com.acme.onboarding.database.repository.OnboardedDriverRepository;
 import com.acme.onboarding.service.model.Address;
 import com.acme.onboarding.service.model.Driver;
-import com.acme.onboarding.service.model.Ride;
+import com.acme.onboarding.service.model.Vehicle;
 
 public class DummyData {
     public static Driver getDriver() {
@@ -17,7 +17,7 @@ public class DummyData {
                 .email("paul@gmail.com")
                 .mobile("123456789")
                 .address(getAddress())
-                .ride(getRide())
+                .vehicle(getVehicle())
                 .build();
     }
 
@@ -32,42 +32,54 @@ public class DummyData {
                 .build();
     }
 
-    public static Ride getRide() {
-        return Ride.builder()
+    public static Vehicle getVehicle() {
+        return Vehicle.builder()
                 .manufacturer("Toyota")
-                .model("Supra")
+                .model("Etios")
+                .type("Sedan")
                 .build();
     }
 
-    public static RideEntity getRideEntity() {
-        return RideEntity.builder()
+    public static VehicleEntity getVehicleEntity() {
+        return VehicleEntity.builder()
                 .manufacturer("Toyota")
-                .model("Supra")
+                .model("Etios")
+                .type("Sedan")
                 .build();
     }
 
-    public static PendingDriverOnboardingEntity getDriverEntity(Integer id, OnboardingModule module, ModuleStatus moduleStatus) {
-        return PendingDriverOnboardingEntity.builder()
+    public static OnboardingEntity getOnboardingEntity(Integer id, OnboardingModule module, ModuleStatus moduleStatus) {
+        return OnboardingEntity.builder()
                 .id(id)
                 .name("Paul")
                 .email("paul@gmail.com")
                 .mobile("123456789")
                 .address(getAddress())
-                .ride(getRideEntity())
+                .vehicleEntity(getVehicleEntity())
                 .module(module != null ? module : OnboardingModule.DOCUMENT_COLLECTION)
                 .moduleStatus(moduleStatus != null ? moduleStatus : ModuleStatus.IN_PROGRESS)
                 .build();
     }
 
-    public static OnboardedDriverEntity getOnboardedDriver(Integer id, PendingDriverOnboardingEntity pendingDriverOnboardingEntity) {
-        return OnboardedDriverEntity.builder()
+    public static DriverEntity getOnboardedDriver(Integer id, OnboardingEntity onboardingEntity) {
+        return DriverEntity.builder()
                 .id(id)
                 .name("Paul")
                 .email("paul@gmail.com")
-                .mobile("123456789")
+                .mobile("1234567890")
                 .address(getAddress())
-                .ride(getRideEntity())
-                .pendingDriverOnboardingEntity(pendingDriverOnboardingEntity)
+                .vehicleEntity(getVehicleEntity())
+                .onboardingEntity(onboardingEntity)
+                .build();
+    }
+
+    public static RegisterDriverRequest getRegisteredDriverRequest(String name){
+        return RegisterDriverRequest.builder()
+                .name(name)
+                .email("paul@gmail.com")
+                .mobile("1234567890")
+                .address(getAddress())
+                .vehicle(getVehicle())
                 .build();
     }
 }

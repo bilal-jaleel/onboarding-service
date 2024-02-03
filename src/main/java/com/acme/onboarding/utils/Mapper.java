@@ -1,46 +1,50 @@
 package com.acme.onboarding.utils;
 
-import com.acme.onboarding.database.entity.PendingDriverOnboardingEntity;
-import com.acme.onboarding.database.entity.RideEntity;
+import com.acme.onboarding.database.entity.OnboardingEntity;
+import com.acme.onboarding.database.entity.VehicleEntity;
 import com.acme.onboarding.service.model.Driver;
-import com.acme.onboarding.service.model.Ride;
+import com.acme.onboarding.service.model.Vehicle;
 
 public class Mapper {
 
-    public static PendingDriverOnboardingEntity mapDriverToEntity(Driver driver) {
+    public static OnboardingEntity mapDriverToOnboardingEntity(Driver driver) {
 
-        return PendingDriverOnboardingEntity.builder()
+        return OnboardingEntity.builder()
                 .name(driver.name())
                 .email(driver.email())
                 .mobile(driver.mobile())
                 .address(driver.address())
-                .ride(mapRideToEntity(driver.ride()))
+                .vehicleEntity(mapVehicleToEntity(driver.vehicle()))
                 .build();
     }
 
-    public static RideEntity mapRideToEntity(Ride ride) {
+    public static VehicleEntity mapVehicleToEntity(Vehicle vehicle) {
 
-        return RideEntity.builder()
-                .model(ride.model())
-                .manufacturer(ride.manufacturer())
+        return VehicleEntity.builder()
+                .model(vehicle.model())
+                .manufacturer(vehicle.manufacturer())
+                .type(vehicle.type())
                 .build();
     }
 
-    public static Driver mapEntityToDriver(PendingDriverOnboardingEntity pendingDriverOnboardingEntity) {
+    public static Driver mapOnboardingEntityToDriver(OnboardingEntity onboardingEntity) {
         return Driver.builder()
-                .name(pendingDriverOnboardingEntity.getName())
-                .email(pendingDriverOnboardingEntity.getEmail())
-                .mobile(pendingDriverOnboardingEntity.getMobile())
-                .address(pendingDriverOnboardingEntity.getAddress())
-                .ride(mapEntityToRide(pendingDriverOnboardingEntity.getRide()))
+                .id(onboardingEntity.getId())
+                .name(onboardingEntity.getName())
+                .email(onboardingEntity.getEmail())
+                .mobile(onboardingEntity.getMobile())
+                .address(onboardingEntity.getAddress())
+                .vehicle(mapEntityToVehicle(onboardingEntity.getVehicleEntity()))
                 .build();
     }
 
-    public static Ride mapEntityToRide(RideEntity rideEntity) {
+    public static Vehicle mapEntityToVehicle(VehicleEntity vehicleEntity) {
 
-        return Ride.builder()
-                .model(rideEntity.getModel())
-                .manufacturer(rideEntity.getManufacturer())
+        return Vehicle.builder()
+                .id(vehicleEntity.getId())
+                .model(vehicleEntity.getModel())
+                .manufacturer(vehicleEntity.getManufacturer())
+                .type(vehicleEntity.getType())
                 .build();
     }
 
