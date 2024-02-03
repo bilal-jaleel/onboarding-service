@@ -42,5 +42,6 @@ public class PendingDriverOnboardingEntity {
 
     @OneToOne(mappedBy = "pendingDriverOnboardingEntity")
     @JsonManagedReference
+    @ToString.Exclude
     OnboardedDriverEntity onboardedDriverEntity;
 }
