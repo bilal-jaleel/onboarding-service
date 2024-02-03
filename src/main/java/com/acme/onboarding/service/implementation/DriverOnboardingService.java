@@ -46,8 +46,8 @@ public class DriverOnboardingService implements IDriverOnboardingService {
     }
 
     @Override
-    public ArrayList<PendingDriverOnboardingEntity> getAllDrivers() {
-        return new ArrayList<>(pendingOnboardingRepository.findAll());
+    public PendingDriverOnboardingEntity getDriverOnboardingStatus(Integer id) {
+        return pendingOnboardingRepository.getReferenceById(id);
     }
 
     @Override

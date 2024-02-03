@@ -46,17 +46,12 @@ Before you begin, ensure you have the following installed:
 1. Run postgres container locally
 
 ```bash
-sudo docker run -v /var/lib/postgres-container/:/var/lib/postgresql/data  -p 5432:5432  -e POSTGRES_PASSWORD=password -d postgres
+ sudo podman run -v ./src/main/resources/init.sql:/docker-entrypoint-initdb.d/data.sql 
+                   -v /var/lib/postgres-container/:/var/lib/postgresql/data
+                   -p 5432:5432  -e POSTGRES_PASSWORD=password -d postgres
 ```
 
-2. Create the database on the container
-
-```bash
-psql -h localhost -U postgres
-```
-
-3. Specify the postgres password, database name in the application.yml file
-4. Run the following command to start the application
+2. Run the following command to start the application
 
 ```bash
 mvn spring-boot:run

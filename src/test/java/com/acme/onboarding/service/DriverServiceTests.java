@@ -65,18 +65,17 @@ public class DriverServiceTests {
     }
 
     @Test
-    void getAllDrivers() {
-        ArrayList<Driver> driverList = new ArrayList<>(Collections.singletonList(DummyData.getDriver()));
-        ArrayList<PendingDriverOnboardingEntity> dummyDatas = new ArrayList<>(Collections.singletonList(Mapper.mapDriverToEntity(driverList.getFirst())));
+    void getDriverOnboardingStatus() {
+        PendingDriverOnboardingEntity onboardingEntity = DummyData.getDriverEntity(null,null,null);
 
-        when(pendingOnboardingRepository.findAll()).thenReturn(dummyDatas);
+        Integer driverId = onboardingEntity.getId();
 
-        ArrayList<PendingDriverOnboardingEntity> drivers = driverOnboardingService.getAllDrivers();
+        when(pendingOnboardingRepository.getReferenceById(onboardingEntity.getId())).thenReturn(onboardingEntity);
 
-        assertEquals(drivers.getFirst().getName(), driverList.getFirst().name());
-        assertEquals(drivers.getFirst().getEmail(), driverList.getFirst().email());
-        assertEquals(drivers.getFirst().getMobile(), driverList.getFirst().mobile());
-        verify(pendingOnboardingRepository, times(1)).findAll();
+        PendingDriverOnboardingEntity driverOnboardingStatus = driverOnboardingService.getDriverOnboardingStatus(driverId);
+
+        assertEquals(onboardingEntity, driverOnboardingStatus);
+        verify(pendingOnboardingRepository, times(1)).getReferenceById(driverId);
     }
 
 

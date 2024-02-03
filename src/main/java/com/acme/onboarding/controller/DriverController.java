@@ -37,10 +37,10 @@ public class DriverController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<GenericResponse<ArrayList<PendingDriverOnboardingEntity>>> getAllDrivers() {
-        ArrayList<PendingDriverOnboardingEntity> drivers = driverOnboardingService.getAllDrivers();
-        GenericResponse<ArrayList<PendingDriverOnboardingEntity>> response = new GenericResponse<>(true, drivers);
+    @GetMapping("/status")
+    public ResponseEntity<GenericResponse<PendingDriverOnboardingEntity>> getDriverOnboardingStatus(@RequestParam(name = "id") Integer id) {
+        PendingDriverOnboardingEntity onboardingEntity = driverOnboardingService.getDriverOnboardingStatus(id);
+        GenericResponse<PendingDriverOnboardingEntity> response = new GenericResponse<>(true, onboardingEntity);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

@@ -11,7 +11,7 @@ public interface IDriverOnboardingService {
 
     Driver register(Driver driver);
 
-    ArrayList<PendingDriverOnboardingEntity> getAllDrivers();
+    PendingDriverOnboardingEntity getDriverOnboardingStatus(Integer id);
 
     boolean markModuleStatusAndTriggerNextModule(int driverID, OnboardingModule module, ModuleStatus status) ;
 
