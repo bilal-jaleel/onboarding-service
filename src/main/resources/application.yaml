@@ -1,0 +1,15 @@
+spring:
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    defer-datasource-initialization: true
+  datasource:
+    platform: postgres
+    url: jdbc:postgresql://localhost:5432/onboarding
+    username: postgres
+    password: password
+    driverClassName: org.postgresql.Driver
+    data: classpath:data.sql,classpath:dummy-data.sql
+  thread-executor: virtual
