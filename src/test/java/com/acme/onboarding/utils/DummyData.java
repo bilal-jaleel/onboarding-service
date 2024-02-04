@@ -1,6 +1,7 @@
 package com.acme.onboarding.utils;
 
 import com.acme.onboarding.controller.request.RegisterDriverRequest;
+import com.acme.onboarding.controller.response.OnboardingStatusResponse;
 import com.acme.onboarding.database.entity.DriverEntity;
 import com.acme.onboarding.database.entity.OnboardingEntity;
 import com.acme.onboarding.database.entity.VehicleEntity;
@@ -80,6 +81,14 @@ public class DummyData {
                 .mobile("1234567890")
                 .address(getAddress())
                 .vehicle(getVehicle())
+                .build();
+    }
+
+    public static OnboardingStatusResponse getOnboardingStatusResponse(Integer id){
+        return OnboardingStatusResponse.builder()
+                .id(id)
+                .module(OnboardingModule.DOCUMENT_COLLECTION)
+                .status(ModuleStatus.IN_PROGRESS)
                 .build();
     }
 }
