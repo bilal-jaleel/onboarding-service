@@ -8,10 +8,10 @@ import com.acme.onboarding.database.enums.OnboardingModule;
 import com.acme.onboarding.database.repository.DriverRepository;
 import com.acme.onboarding.database.repository.OnboardingRepository;
 import com.acme.onboarding.database.repository.VehicleRepository;
+import com.acme.onboarding.utils.DummyData;
 import jakarta.validation.ValidationException;
 import com.acme.onboarding.service.implementation.DriverOnboardingService;
 import com.acme.onboarding.service.model.Driver;
-import com.acme.onboarding.utils.DummyData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,6 +52,7 @@ public class DriverServiceTests {
         when(vehicleRepository.findByManufacturerAndModel(anyString(), anyString())).thenReturn(vehicleEntity);
 
         Driver savedDriver = driverOnboardingService.register(driver);
+
         assertEquals(driver.name(), savedDriver.name());
         assertEquals(driver.email(), savedDriver.email());
         assertEquals(driver.mobile(), savedDriver.mobile());
