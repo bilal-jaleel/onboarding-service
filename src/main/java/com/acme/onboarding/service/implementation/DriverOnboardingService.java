@@ -16,6 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import jakarta.validation.ValidationException;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @Service
 @Slf4j
 public class DriverOnboardingService implements IDriverOnboardingService {
@@ -74,7 +78,7 @@ public class DriverOnboardingService implements IDriverOnboardingService {
 
         // If the current module has failed, then update the status and return
         if (status == ModuleStatus.FAILED) {
-            onboardingRepository.updateModuleStatusForDriver(driverID, module, status);
+            onboardingRepository.updateModuleStatusForDriver(driverID, module, status, currentDriverOnboardingEntity.getCompletedModules());
             return;
         }
 
@@ -84,9 +88,10 @@ public class DriverOnboardingService implements IDriverOnboardingService {
         if (nextPossibleModule == OnboardingModule.ONBOARDED) {
             nextModuleStatus = ModuleStatus.SUCCESS;
         }
-
+        ArrayList<String> completedModules = currentDriverOnboardingEntity.getCompletedModules() != null ? currentDriverOnboardingEntity.getCompletedModules() : new ArrayList<>();
+        completedModules.add(currentDriverOnboardingEntity.getModule().name());
         // mark & trigger next module
-        onboardingRepository.updateModuleStatusForDriver(driverID, nextPossibleModule, nextModuleStatus);
+        onboardingRepository.updateModuleStatusForDriver(driverID, nextPossibleModule, nextModuleStatus, completedModules);
     }
 
     @Override
@@ -101,7 +106,6 @@ public class DriverOnboardingService implements IDriverOnboardingService {
                 .mobile(onboardingEntity.getMobile())
                 .name(onboardingEntity.getName())
                 .vehicleEntity(onboardingEntity.getVehicleEntity())
-                .onboardingEntity(onboardingEntity)
                 .build();
 
         driverRepository.save(driverEntity);

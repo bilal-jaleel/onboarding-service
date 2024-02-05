@@ -3,12 +3,16 @@ package com.acme.onboarding;
 import com.acme.onboarding.controller.request.MarkDriverReadyRequest;
 import com.acme.onboarding.controller.request.RegisterDriverRequest;
 import com.acme.onboarding.controller.request.UpdateModuleStatusRequest;
+import com.acme.onboarding.database.enums.ModuleStatus;
+import com.acme.onboarding.database.enums.OnboardingModule;
 import com.acme.onboarding.service.interfaces.IDriverOnboardingService;
+import com.acme.onboarding.utils.TestData;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+import com.jayway.jsonpath.JsonPath;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -16,12 +20,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@AutoConfigureTestDatabase
-class OnboardingControllerIntegrationTest {
+class OnboardingIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -32,45 +37,92 @@ class OnboardingControllerIntegrationTest {
     @Autowired
     private IDriverOnboardingService driverOnboardingService;
 
-    // Store created entities to clean up after each test
-    private int driverId;
+    private static Integer driverId;
 
-    @Test
-    void testOnboardingWorkflow() throws Exception {
-        // Step 1: Register a driver
-        RegisterDriverRequest registerRequest = new RegisterDriverRequest(/* provide necessary details */);
-        MvcResult registerResult = mockMvc.perform(MockMvcRequestBuilders.post("/driver/onboarding/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(registerRequest)))
-                .andExpect(status().isOk())
-                .andReturn();
 
-        // Extract driver ID from the registration result
-        driverId = Integer.parseInt(registerResult.getResponse().getContentAsString());
+    @Nested
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    @Execution(ExecutionMode.SAME_THREAD)
+    class OnboardingFlow {
 
-        // Step 2: Get driver onboarding status
-        mockMvc.perform(MockMvcRequestBuilders.get("/driver/onboarding/status")
-                        .param("id", String.valueOf(driverId)))
-                .andExpect(status().isOk());
+        @Test
+        @Order(1)
+        void testRegisterDriverSuccess() throws Exception {
+            // Step 1: Register a driver
+            RegisterDriverRequest registerRequest = TestData.getRegisteredDriverRequest("Paul");
+            MvcResult registerResult = mockMvc.perform(MockMvcRequestBuilders.post("/driver/onboarding/register")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(registerRequest)))
+                    .andExpect(status().isOk())
+                    .andDo(print())
+                    .andReturn();
 
-        // Step 3: Update module status
-        UpdateModuleStatusRequest updateRequest = new UpdateModuleStatusRequest(/* provide necessary details */);
-        mockMvc.perform(MockMvcRequestBuilders.put("/driver/onboarding/update")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateRequest)))
-                .andExpect(status().isOk());
+            // Extract driver ID from the registration result
+            driverId = JsonPath.read(registerResult.getResponse().getContentAsString(), "$.data.id");
+        }
 
-        // Step 4: Mark driver as ready
-        MarkDriverReadyRequest readyRequest = new MarkDriverReadyRequest(/* provide necessary details */);
-        mockMvc.perform(MockMvcRequestBuilders.post("/driver/onboarding/ready")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(readyRequest)))
-                .andExpect(status().isOk());
-    }
+        @Test
+        @Order(2)
+        void testUpdateDocumentCollectionStatusSuccess() throws Exception {
 
-    @AfterEach
-    void cleanup() {
-        // Rollback transactions and clean up created entries
-        driverOnboardingService.deleteDriver(driverId);
+            // Step 2: Update Document Collection Status as success
+            UpdateModuleStatusRequest updateRequest = TestData.getUpdateModuleStatusRequest(driverId, OnboardingModule.DOCUMENT_COLLECTION, ModuleStatus.SUCCESS);
+            mockMvc.perform(MockMvcRequestBuilders.put("/driver/onboarding/update")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(updateRequest)))
+                    .andDo(print())
+                    .andExpect(status().isOk());
+        }
+
+        @Test
+        @Order(3)
+        void testUpdateBackgroundVerificationStatusSuccess() throws Exception {
+
+            // Step 3: Update Background Verification Status as success
+            UpdateModuleStatusRequest updateRequest = TestData.getUpdateModuleStatusRequest(driverId, OnboardingModule.BACKGROUND_VERIFICATION, ModuleStatus.SUCCESS);
+            mockMvc.perform(MockMvcRequestBuilders.put("/driver/onboarding/update")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(updateRequest)))
+                    .andDo(print())
+                    .andExpect(status().isOk());
+        }
+
+        @Test
+        @Order(4)
+        void testUpdateTrackerShippingStatusSuccess() throws Exception {
+            // Step 4: Update Tracker Shipping Status as success
+            UpdateModuleStatusRequest updateRequest = TestData.getUpdateModuleStatusRequest(driverId, OnboardingModule.TRACKER_SHIPPING, ModuleStatus.SUCCESS);
+            mockMvc.perform(MockMvcRequestBuilders.put("/driver/onboarding/update")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(updateRequest)))
+                    .andDo(print())
+                    .andExpect(status().isOk());
+        }
+
+        @Test
+        @Order(5)
+        void testGetOnboardingStatusSuccess() throws Exception {
+            // Step 5: Check Driver Status is onboarded
+            mockMvc.perform(MockMvcRequestBuilders.get("/driver/onboarding/status")
+                            .param("id", String.valueOf(driverId)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value(true))
+                    .andExpect(jsonPath("$.data.module").value(OnboardingModule.ONBOARDED.toString()))
+                    .andExpect(jsonPath("$.data.status").value(ModuleStatus.SUCCESS.toString()))
+                    .andDo(print());
+        }
+
+        @Test
+        @Order(6)
+        void testMarkDriverReadySuccess() throws Exception {
+            // Step 6: Mark driver as ready
+            MarkDriverReadyRequest readyRequest = new MarkDriverReadyRequest(driverId);
+            mockMvc.perform(MockMvcRequestBuilders.post("/driver/onboarding/ready")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(readyRequest)))
+                    .andDo(print())
+                    .andExpect(status().isOk());
+        }
+
     }
 }

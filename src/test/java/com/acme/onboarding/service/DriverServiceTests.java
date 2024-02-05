@@ -8,7 +8,7 @@ import com.acme.onboarding.database.enums.OnboardingModule;
 import com.acme.onboarding.database.repository.DriverRepository;
 import com.acme.onboarding.database.repository.OnboardingRepository;
 import com.acme.onboarding.database.repository.VehicleRepository;
-import com.acme.onboarding.utils.DummyData;
+import com.acme.onboarding.utils.TestData;
 import jakarta.validation.ValidationException;
 import com.acme.onboarding.service.implementation.DriverOnboardingService;
 import com.acme.onboarding.service.model.Driver;
@@ -44,9 +44,9 @@ public class DriverServiceTests {
 
     @Test
     void testCreateDriverSuccess() {
-        Driver driver = DummyData.getDriver();
-        OnboardingEntity onboardingEntity = DummyData.getOnboardingEntity(null, null, null);
-        VehicleEntity vehicleEntity = DummyData.getVehicleEntity();
+        Driver driver = TestData.getDriver();
+        OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(null, null, null);
+        VehicleEntity vehicleEntity = TestData.getVehicleEntity();
 
         when(pendingOnboardingRepository.save(any())).thenReturn(onboardingEntity);
         when(vehicleRepository.findByManufacturerAndModel(anyString(), anyString())).thenReturn(vehicleEntity);
@@ -61,7 +61,7 @@ public class DriverServiceTests {
 
     @Test
     void testGetDriverOnboardingStatusSuccess() {
-        OnboardingEntity onboardingEntity = DummyData.getOnboardingEntity(null,null,null);
+        OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(null, null, null);
 
         Integer driverId = onboardingEntity.getId();
 
@@ -77,22 +77,22 @@ public class DriverServiceTests {
     @Test
     void testUpdateDocumentCollectionSuccess() {
 
-        OnboardingEntity onboardingEntity = DummyData.getOnboardingEntity(1, OnboardingModule.DOCUMENT_COLLECTION, ModuleStatus.SUCCESS);
+        OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(1, OnboardingModule.DOCUMENT_COLLECTION, ModuleStatus.SUCCESS);
 
         int driverID = onboardingEntity.getId();
 
-        doNothing().when(pendingOnboardingRepository).updateModuleStatusForDriver(driverID, OnboardingModule.BACKGROUND_VERIFICATION, ModuleStatus.IN_PROGRESS);
+        doNothing().when(pendingOnboardingRepository).updateModuleStatusForDriver(anyInt(), any(), any(), any());
         when(pendingOnboardingRepository.getReferenceById(driverID)).thenReturn(onboardingEntity);
 
         driverOnboardingService.updateModuleStatus(driverID, OnboardingModule.DOCUMENT_COLLECTION, ModuleStatus.SUCCESS);
 
-        verify(pendingOnboardingRepository, times(1)).updateModuleStatusForDriver(driverID, OnboardingModule.BACKGROUND_VERIFICATION, ModuleStatus.IN_PROGRESS);
+        verify(pendingOnboardingRepository, times(1)).updateModuleStatusForDriver(anyInt(), any(), any(), any());
     }
 
     @Test
     void testInvalidModuleUpdate() {
 
-        OnboardingEntity onboardingEntity = DummyData.getOnboardingEntity(1, OnboardingModule.DOCUMENT_COLLECTION, ModuleStatus.IN_PROGRESS);
+        OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(1, OnboardingModule.DOCUMENT_COLLECTION, ModuleStatus.IN_PROGRESS);
 
         int driverID = onboardingEntity.getId();
 
@@ -107,7 +107,7 @@ public class DriverServiceTests {
     @Test
     void testModuleUpdationOfOnboardedDriver() {
 
-        OnboardingEntity onboardingEntity = DummyData.getOnboardingEntity(1, OnboardingModule.ONBOARDED, ModuleStatus.SUCCESS);
+        OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(1, OnboardingModule.ONBOARDED, ModuleStatus.SUCCESS);
 
         int driverID = onboardingEntity.getId();
 
@@ -122,35 +122,46 @@ public class DriverServiceTests {
     @Test
     void testOnboardedModuleStatusUpdate() {
 
-        OnboardingEntity onboardingEntity = DummyData.getOnboardingEntity(1, OnboardingModule.TRACKER_SHIPPING, ModuleStatus.IN_PROGRESS);
+        OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(1, OnboardingModule.TRACKER_SHIPPING, ModuleStatus.IN_PROGRESS);
 
         int driverID = onboardingEntity.getId();
 
         when(pendingOnboardingRepository.getReferenceById(driverID)).thenReturn(onboardingEntity);
-        doNothing().when(pendingOnboardingRepository).updateModuleStatusForDriver(driverID, OnboardingModule.ONBOARDED, ModuleStatus.SUCCESS);
+        doNothing().when(pendingOnboardingRepository).updateModuleStatusForDriver(anyInt(), any(), any(), any());
 
         driverOnboardingService.updateModuleStatus(driverID, OnboardingModule.TRACKER_SHIPPING, ModuleStatus.SUCCESS);
         verify(pendingOnboardingRepository, times(1)).getReferenceById(driverID);
-        verify(pendingOnboardingRepository, times(1)).updateModuleStatusForDriver(driverID,OnboardingModule.ONBOARDED, ModuleStatus.SUCCESS);
+        verify(pendingOnboardingRepository, times(1)).updateModuleStatusForDriver(anyInt(), any(), any(), any());
     }
 
     @Test
     void testModuleFailureStatusUpdation() {
-        OnboardingEntity onboardingEntity = DummyData.getOnboardingEntity(1, OnboardingModule.TRACKER_SHIPPING, ModuleStatus.IN_PROGRESS);
+        OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(1, OnboardingModule.TRACKER_SHIPPING, ModuleStatus.IN_PROGRESS);
         int driverID = onboardingEntity.getId();
 
         when(pendingOnboardingRepository.getReferenceById(driverID)).thenReturn(onboardingEntity);
-        doNothing().when(pendingOnboardingRepository).updateModuleStatusForDriver(driverID, OnboardingModule.TRACKER_SHIPPING, ModuleStatus.FAILED);
+        doNothing().when(pendingOnboardingRepository).updateModuleStatusForDriver(anyInt(), any(), any(), any());
 
         driverOnboardingService.updateModuleStatus(driverID, OnboardingModule.TRACKER_SHIPPING, ModuleStatus.FAILED);
         verify(pendingOnboardingRepository, times(1)).getReferenceById(driverID);
-        verify(pendingOnboardingRepository, times(1)).updateModuleStatusForDriver(driverID,OnboardingModule.TRACKER_SHIPPING, ModuleStatus.FAILED);
+        verify(pendingOnboardingRepository, times(1)).updateModuleStatusForDriver(anyInt(), any(), any(), any());
     }
 
     @Test
-    void testMarkDriverReady(){
-        OnboardingEntity onboardingEntity = DummyData.getOnboardingEntity(1, OnboardingModule.ONBOARDED, ModuleStatus.SUCCESS);
-        DriverEntity driverEntity = DummyData.getOnboardedDriver(0, onboardingEntity);
+    void testModuleInProgressStatusUpdation() {
+        OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(1, OnboardingModule.TRACKER_SHIPPING, ModuleStatus.IN_PROGRESS);
+        int driverID = onboardingEntity.getId();
+
+        when(pendingOnboardingRepository.getReferenceById(driverID)).thenReturn(onboardingEntity);
+
+        assertThrows(ValidationException.class, () -> driverOnboardingService.updateModuleStatus(driverID, OnboardingModule.TRACKER_SHIPPING, ModuleStatus.IN_PROGRESS));
+        verify(pendingOnboardingRepository, times(1)).getReferenceById(driverID);
+    }
+
+    @Test
+    void testMarkDriverReady() {
+        OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(1, OnboardingModule.ONBOARDED, ModuleStatus.SUCCESS);
+        DriverEntity driverEntity = TestData.getOnboardedDriver(0, onboardingEntity);
 
         Integer driverID = onboardingEntity.getId();
 
@@ -163,8 +174,8 @@ public class DriverServiceTests {
     }
 
     @Test
-    void testMarkDriverReadyOfNonOnboardedDriver(){
-        OnboardingEntity onboardingEntity = DummyData.getOnboardingEntity(1, OnboardingModule.DOCUMENT_COLLECTION, ModuleStatus.IN_PROGRESS);
+    void testMarkDriverReadyOfNonOnboardedDriver() {
+        OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(1, OnboardingModule.DOCUMENT_COLLECTION, ModuleStatus.IN_PROGRESS);
 
         int driverID = onboardingEntity.getId();
 

@@ -35,9 +35,5 @@ public class DriverEntity {
     @JoinColumn(name = "vehicle_id", referencedColumnName = "id")
     VehicleEntity vehicleEntity;
 
-    @JsonBackReference
-    @OneToOne
-    @JoinColumn(name = "onboarding_id", referencedColumnName = "id")
-    OnboardingEntity onboardingEntity;
 }
 

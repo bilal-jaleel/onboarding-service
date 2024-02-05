@@ -4,11 +4,13 @@ import com.acme.onboarding.database.enums.ModuleStatus;
 import com.acme.onboarding.database.enums.OnboardingModule;
 import com.acme.onboarding.service.model.Address;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "onboarding")
@@ -30,8 +32,10 @@ public class OnboardingEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     Address address;
 
+    @Enumerated(EnumType.STRING)
     OnboardingModule module;
 
+    @Enumerated(EnumType.STRING)
     ModuleStatus moduleStatus;
 
     @JsonBackReference
@@ -40,8 +44,7 @@ public class OnboardingEntity {
     @ToString.Exclude
     VehicleEntity vehicleEntity;
 
-    @OneToOne(mappedBy = "onboardingEntity")
-    @JsonManagedReference
-    @ToString.Exclude
-    DriverEntity driverEntity;
+    @JdbcTypeCode(SqlTypes.JSON)
+    ArrayList<String> completedModules;
+
 }

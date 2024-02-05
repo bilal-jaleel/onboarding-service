@@ -1,6 +1,7 @@
 package com.acme.onboarding.utils;
 
 import com.acme.onboarding.controller.request.RegisterDriverRequest;
+import com.acme.onboarding.controller.request.UpdateModuleStatusRequest;
 import com.acme.onboarding.controller.response.OnboardingStatusResponse;
 import com.acme.onboarding.database.entity.DriverEntity;
 import com.acme.onboarding.database.entity.OnboardingEntity;
@@ -11,7 +12,7 @@ import com.acme.onboarding.service.model.Address;
 import com.acme.onboarding.service.model.Driver;
 import com.acme.onboarding.service.model.Vehicle;
 
-public class DummyData {
+public class TestData {
     public static Driver getDriver() {
         return Driver.builder()
                 .name("Paul")
@@ -70,7 +71,6 @@ public class DummyData {
                 .mobile("1234567890")
                 .address(getAddress())
                 .vehicleEntity(getVehicleEntity())
-                .onboardingEntity(onboardingEntity)
                 .build();
     }
 
@@ -89,6 +89,14 @@ public class DummyData {
                 .id(id)
                 .module(OnboardingModule.DOCUMENT_COLLECTION)
                 .status(ModuleStatus.IN_PROGRESS)
+                .build();
+    }
+
+    public static UpdateModuleStatusRequest getUpdateModuleStatusRequest(Integer id, OnboardingModule onboardingModule, ModuleStatus moduleStatus){
+        return UpdateModuleStatusRequest.builder()
+                .id(id)
+                .onboardingModule(onboardingModule)
+                .moduleStatus(moduleStatus)
                 .build();
     }
 }

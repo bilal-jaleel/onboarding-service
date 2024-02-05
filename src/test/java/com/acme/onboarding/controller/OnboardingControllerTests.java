@@ -5,13 +5,12 @@ import com.acme.onboarding.controller.request.MarkDriverReadyRequest;
 import com.acme.onboarding.controller.request.RegisterDriverRequest;
 import com.acme.onboarding.controller.request.UpdateModuleStatusRequest;
 import com.acme.onboarding.controller.response.GenericResponse;
-import com.acme.onboarding.controller.response.OnboardingStatusResponse;
 import com.acme.onboarding.database.entity.OnboardingEntity;
 import com.acme.onboarding.database.enums.ModuleStatus;
 import com.acme.onboarding.database.enums.OnboardingModule;
 import com.acme.onboarding.service.interfaces.IDriverOnboardingService;
 import com.acme.onboarding.service.model.Driver;
-import com.acme.onboarding.utils.DummyData;
+import com.acme.onboarding.utils.TestData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +40,8 @@ public class OnboardingControllerTests {
 
     @Test
     public void testRegisterDriverSuccess() throws Exception {
-        RegisterDriverRequest registerDriverRequest = DummyData.getRegisteredDriverRequest("Paul");
-        Driver driver = DummyData.getDriver();
+        RegisterDriverRequest registerDriverRequest = TestData.getRegisteredDriverRequest("Paul");
+        Driver driver = TestData.getDriver();
 
         GenericResponse<Driver> genericResponse = new GenericResponse<>(true, driver);
 
@@ -57,7 +56,7 @@ public class OnboardingControllerTests {
 
     @Test
     public void testRegisterDriverBadRequest() throws Exception {
-        RegisterDriverRequest registerDriverRequest = DummyData.getRegisteredDriverRequest(null);
+        RegisterDriverRequest registerDriverRequest = TestData.getRegisteredDriverRequest(null);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/driver/onboarding/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -67,7 +66,7 @@ public class OnboardingControllerTests {
 
     @Test
     public void testGetDriverOnboardingStatus() throws Exception {
-        OnboardingEntity onboardingEntity = DummyData.getOnboardingEntity(1,null,null);  // create a sample OnboardingEntity
+        OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(1,null,null);  // create a sample OnboardingEntity
         when(driverOnboardingService.getDriverOnboardingStatus(anyInt())).thenReturn(onboardingEntity);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/driver/onboarding/status")

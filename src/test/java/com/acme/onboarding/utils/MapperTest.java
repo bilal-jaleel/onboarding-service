@@ -13,7 +13,7 @@ public class MapperTest {
 
     @Test
     public void testMapDriverToEntity() {
-        Driver driver = DummyData.getDriver();
+        Driver driver = TestData.getDriver();
         OnboardingEntity onboardingEntity = Mapper.mapDriverToOnboardingEntity(driver);
         assertEquals(onboardingEntity.getName(), driver.name());
         assertEquals(onboardingEntity.getEmail(), driver.email());
@@ -22,7 +22,7 @@ public class MapperTest {
 
     @Test
     public void testMapRideToEntity() {
-        Vehicle vehicle = DummyData.getVehicle();
+        Vehicle vehicle = TestData.getVehicle();
         VehicleEntity vehicleEntity = Mapper.mapVehicleToEntity(vehicle);
         assertEquals(vehicle.manufacturer(), vehicleEntity.getManufacturer());
         assertEquals(vehicle.model(), vehicleEntity.getModel());
@@ -30,7 +30,7 @@ public class MapperTest {
 
     @Test
     public void testMapEntityToRide() {
-        VehicleEntity vehicleEntity = DummyData.getVehicleEntity();
+        VehicleEntity vehicleEntity = TestData.getVehicleEntity();
         Vehicle vehicle = Mapper.mapEntityToVehicle(vehicleEntity);
         assertEquals(vehicle.manufacturer(), vehicleEntity.getManufacturer());
         assertEquals(vehicle.model(), vehicleEntity.getModel());
@@ -38,7 +38,7 @@ public class MapperTest {
 
     @Test
     public void testMapEntityToDriver() {
-        OnboardingEntity onboardingEntity = DummyData.getOnboardingEntity(null, null,null);
+        OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(null, null,null);
         Driver driver = Mapper.mapOnboardingEntityToDriver(onboardingEntity);
         assertEquals(onboardingEntity.getName(), driver.name());
         assertEquals(onboardingEntity.getEmail(), driver.email());
