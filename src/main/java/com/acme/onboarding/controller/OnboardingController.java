@@ -25,7 +25,7 @@ public class OnboardingController {
     IDriverOnboardingService driverOnboardingService;
 
     @PostMapping("/register")
-    public ResponseEntity<GenericResponse<Driver>> register(@RequestBody @Valid RegisterDriverRequest registerDriverRequest) {
+    public ResponseEntity<GenericResponse<Driver>> register(@RequestBody @Valid RegisterDriverRequest registerDriverRequest) throws InterruptedException {
 
         Driver driver = Driver.builder()
                 .name(registerDriverRequest.name())
@@ -54,7 +54,7 @@ public class OnboardingController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<GenericResponse<String>> updateModuleStatus(@RequestBody @Valid UpdateModuleStatusRequest updateModuleStatusRequest) {
+    public ResponseEntity<GenericResponse<String>> updateModuleStatus(@RequestBody @Valid UpdateModuleStatusRequest updateModuleStatusRequest) throws InterruptedException {
         driverOnboardingService.updateModuleStatus(updateModuleStatusRequest.id(), updateModuleStatusRequest.onboardingModule(), updateModuleStatusRequest.moduleStatus());
         return new ResponseEntity<>(new GenericResponse<>(true, "module status updated successfully"), HttpStatus.OK);
     }

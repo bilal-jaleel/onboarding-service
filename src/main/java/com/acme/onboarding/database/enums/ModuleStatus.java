@@ -1,7 +1,7 @@
 package com.acme.onboarding.database.enums;
 
 public enum ModuleStatus {
-    INIT,
+    START,
     IN_PROGRESS,
     SUCCESS,
     FAILED

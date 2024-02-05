@@ -7,11 +7,11 @@ import com.acme.onboarding.service.model.Driver;
 
 public interface IDriverOnboardingService {
 
-    Driver register(Driver driver);
+    Driver register(Driver driver) throws InterruptedException;
 
     OnboardingEntity getDriverOnboardingStatus(Integer id);
 
-    void updateModuleStatus(int driverID, OnboardingModule module, ModuleStatus status) ;
+    void updateModuleStatus(int driverID, OnboardingModule module, ModuleStatus status) throws InterruptedException;
 
     void markDriverReady(int driverID);
 

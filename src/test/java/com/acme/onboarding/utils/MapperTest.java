@@ -2,6 +2,8 @@ package com.acme.onboarding.utils;
 
 import com.acme.onboarding.database.entity.OnboardingEntity;
 import com.acme.onboarding.database.entity.VehicleEntity;
+import com.acme.onboarding.database.enums.ModuleStatus;
+import com.acme.onboarding.database.enums.OnboardingModule;
 import com.acme.onboarding.service.model.Driver;
 import com.acme.onboarding.service.model.Vehicle;
 import org.junit.jupiter.api.Test;
@@ -14,7 +16,7 @@ public class MapperTest {
     @Test
     public void testMapDriverToEntity() {
         Driver driver = TestData.getDriver();
-        OnboardingEntity onboardingEntity = Mapper.mapDriverToOnboardingEntity(driver);
+        OnboardingEntity onboardingEntity = Mapper.mapDriverToOnboardingEntity(driver, OnboardingModule.DOCUMENT_COLLECTION, ModuleStatus.IN_PROGRESS, null);
         assertEquals(onboardingEntity.getName(), driver.name());
         assertEquals(onboardingEntity.getEmail(), driver.email());
         assertEquals(onboardingEntity.getMobile(), driver.mobile());

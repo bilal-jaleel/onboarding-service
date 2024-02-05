@@ -9,6 +9,7 @@ import com.acme.onboarding.database.repository.DriverRepository;
 import com.acme.onboarding.database.repository.OnboardingRepository;
 import com.acme.onboarding.database.repository.VehicleRepository;
 import com.acme.onboarding.service.interfaces.IDriverOnboardingService;
+import com.acme.onboarding.service.interfaces.IExternalService;
 import com.acme.onboarding.service.model.Driver;
 import com.acme.onboarding.utils.Mapper;
 import lombok.extern.slf4j.Slf4j;
@@ -33,17 +34,28 @@ public class DriverOnboardingService implements IDriverOnboardingService {
     @Autowired
     DriverRepository driverRepository;
 
-    @Override
-    public Driver register(Driver driver) {
-        VehicleEntity vehicleEntity = vehicleRepository.findByManufacturerAndModel(driver.vehicle().manufacturer(), driver.vehicle().model());
-        OnboardingEntity onboardingEntity = Mapper.mapDriverToOnboardingEntity(driver);
+    @Autowired
+    IExternalService externalService;
 
-        onboardingEntity.setVehicleEntity(vehicleEntity);
-        onboardingEntity.setModule(OnboardingModule.DOCUMENT_COLLECTION);
-        onboardingEntity.setModuleStatus(ModuleStatus.IN_PROGRESS);
+    @Override
+    public Driver register(Driver driver) throws InterruptedException {
+        // Get the vehicle of the driver
+        VehicleEntity vehicleEntity = vehicleRepository.findByManufacturerAndModel(driver.vehicle().manufacturer(), driver.vehicle().model());
+
+        // Vehicle does not exist in the db
+        if(vehicleEntity == null){
+            throw new ValidationException("Invalid vehicle selected");
+        }
+
+        // Create onboarding entity from driver object
+        OnboardingEntity onboardingEntity = Mapper.mapDriverToOnboardingEntity(driver,
+                OnboardingModule.DOCUMENT_COLLECTION,
+                ModuleStatus.IN_PROGRESS,
+                vehicleEntity);
 
         OnboardingEntity registerdOnboardingEntity = onboardingRepository.save(onboardingEntity);
         // Todo: Trigger Driver Onboarding Procedures
+        externalService.documentCollection(registerdOnboardingEntity.getId());
         return Mapper.mapOnboardingEntityToDriver(registerdOnboardingEntity);
     }
 
@@ -53,11 +65,11 @@ public class DriverOnboardingService implements IDriverOnboardingService {
     }
 
     @Override
-    public void updateModuleStatus(int driverID, OnboardingModule module, ModuleStatus status) {
+    public void updateModuleStatus(int driverID, OnboardingModule module, ModuleStatus status) throws InterruptedException {
         OnboardingEntity currentDriverOnboardingEntity = onboardingRepository.getReferenceById(driverID);
 
         //If the status being updated is to in_progress, that is invalid
-        if(status == ModuleStatus.IN_PROGRESS){
+        if (status == ModuleStatus.IN_PROGRESS) {
             log.error("The module is already in progress");
             throw new ValidationException("The module is already in progress");
         }
@@ -78,27 +90,46 @@ public class DriverOnboardingService implements IDriverOnboardingService {
 
         // If the current module has failed, then update the status and return
         if (status == ModuleStatus.FAILED) {
+            log.info("Updating status of module " + module + " for driverId: " + driverID + " to failed");
             onboardingRepository.updateModuleStatusForDriver(driverID, module, status, currentDriverOnboardingEntity.getCompletedModules());
             return;
         }
-
-        OnboardingModule nextPossibleModule =
-                OnboardingModule.values()[currentDriverOnboardingEntity.getModule().ordinal() + 1];
-        ModuleStatus nextModuleStatus = ModuleStatus.IN_PROGRESS;
-        if (nextPossibleModule == OnboardingModule.ONBOARDED) {
-            nextModuleStatus = ModuleStatus.SUCCESS;
-        }
         ArrayList<String> completedModules = currentDriverOnboardingEntity.getCompletedModules() != null ? currentDriverOnboardingEntity.getCompletedModules() : new ArrayList<>();
         completedModules.add(currentDriverOnboardingEntity.getModule().name());
-        // mark & trigger next module
-        onboardingRepository.updateModuleStatusForDriver(driverID, nextPossibleModule, nextModuleStatus, completedModules);
+
+        OnboardingModule nextModule =
+                OnboardingModule.values()[currentDriverOnboardingEntity.getModule().ordinal() + 1];
+
+        // If next module is onboarded, there are no more services to trigger
+        if (nextModule == OnboardingModule.ONBOARDED) {
+            onboardingRepository.updateModuleStatusForDriver(driverID, OnboardingModule.ONBOARDED, ModuleStatus.SUCCESS, completedModules);
+            return;
+        }
+
+        // mark the next module as started
+        onboardingRepository.updateModuleStatusForDriver(driverID, nextModule, ModuleStatus.START, completedModules);
+
+        int retry = 0;
+        while (retry < 3 && !callServiceForModule(nextModule, driverID)){
+            retry++;
+        }
+
+        if (retry >= 3){
+            log.error("External service for module: "+ module + " unreachable for driver with id: " + driverID);
+           throw new RuntimeException("There is some error processing your request");
+        }
+
+        onboardingRepository.updateModuleStatusForDriver(driverID, nextModule, ModuleStatus.IN_PROGRESS, completedModules);
     }
 
     @Override
     public void markDriverReady(int driverID) {
+        // Get onboarding status for the driver
         OnboardingEntity onboardingEntity = onboardingRepository.getReferenceById(driverID);
-        if(onboardingEntity.getModule() != OnboardingModule.ONBOARDED){
-           throw new ValidationException("The driver must be onboarded before he can be ready to start a ride");
+
+        // Check if driver is not onboarded
+        if (onboardingEntity.getModule() != OnboardingModule.ONBOARDED) {
+            throw new ValidationException("The driver must be onboarded before he can be ready to start a ride");
         }
         DriverEntity driverEntity = DriverEntity.builder()
                 .email(onboardingEntity.getEmail())
@@ -108,7 +139,18 @@ public class DriverOnboardingService implements IDriverOnboardingService {
                 .vehicleEntity(onboardingEntity.getVehicleEntity())
                 .build();
 
+        // Move the onboarded driver to driver table
         driverRepository.save(driverEntity);
+        log.info("Marked Driver with id " + driverID + " as ready");
+    }
+
+    private boolean callServiceForModule(OnboardingModule module, Integer driverId) throws InterruptedException {
+        return switch (module){
+            case DOCUMENT_COLLECTION -> externalService.documentCollection(driverId);
+            case BACKGROUND_VERIFICATION -> externalService.backgroundVerification(driverId);
+            case TRACKER_SHIPPING -> externalService.trackerShipping(driverId);
+            case ONBOARDED -> true;
+        };
     }
 
 

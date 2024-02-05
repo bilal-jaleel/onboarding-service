@@ -43,7 +43,7 @@ public class DriverServiceTests {
 
 
     @Test
-    void testCreateDriverSuccess() {
+    void testCreateDriverSuccess() throws InterruptedException {
         Driver driver = TestData.getDriver();
         OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(null, null, null);
         VehicleEntity vehicleEntity = TestData.getVehicleEntity();
@@ -75,7 +75,7 @@ public class DriverServiceTests {
 
 
     @Test
-    void testUpdateDocumentCollectionSuccess() {
+    void testUpdateDocumentCollectionSuccess() throws InterruptedException {
 
         OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(1, OnboardingModule.DOCUMENT_COLLECTION, ModuleStatus.SUCCESS);
 
@@ -86,7 +86,7 @@ public class DriverServiceTests {
 
         driverOnboardingService.updateModuleStatus(driverID, OnboardingModule.DOCUMENT_COLLECTION, ModuleStatus.SUCCESS);
 
-        verify(pendingOnboardingRepository, times(1)).updateModuleStatusForDriver(anyInt(), any(), any(), any());
+        verify(pendingOnboardingRepository, times(2)).updateModuleStatusForDriver(anyInt(), any(), any(), any());
     }
 
     @Test
@@ -120,7 +120,7 @@ public class DriverServiceTests {
     }
 
     @Test
-    void testOnboardedModuleStatusUpdate() {
+    void testOnboardedModuleStatusUpdate() throws InterruptedException {
 
         OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(1, OnboardingModule.TRACKER_SHIPPING, ModuleStatus.IN_PROGRESS);
 
@@ -135,7 +135,7 @@ public class DriverServiceTests {
     }
 
     @Test
-    void testModuleFailureStatusUpdation() {
+    void testModuleFailureStatusUpdation() throws InterruptedException {
         OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(1, OnboardingModule.TRACKER_SHIPPING, ModuleStatus.IN_PROGRESS);
         int driverID = onboardingEntity.getId();
 

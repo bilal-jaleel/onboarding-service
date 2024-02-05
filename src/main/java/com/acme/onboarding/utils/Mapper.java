@@ -2,12 +2,14 @@ package com.acme.onboarding.utils;
 
 import com.acme.onboarding.database.entity.OnboardingEntity;
 import com.acme.onboarding.database.entity.VehicleEntity;
+import com.acme.onboarding.database.enums.ModuleStatus;
+import com.acme.onboarding.database.enums.OnboardingModule;
 import com.acme.onboarding.service.model.Driver;
 import com.acme.onboarding.service.model.Vehicle;
 
 public class Mapper {
 
-    public static OnboardingEntity mapDriverToOnboardingEntity(Driver driver) {
+    public static OnboardingEntity mapDriverToOnboardingEntity(Driver driver, OnboardingModule onboardingModule, ModuleStatus moduleStatus, VehicleEntity vehicleEntity) {
 
         return OnboardingEntity.builder()
                 .name(driver.name())
@@ -15,6 +17,9 @@ public class Mapper {
                 .mobile(driver.mobile())
                 .address(driver.address())
                 .vehicleEntity(mapVehicleToEntity(driver.vehicle()))
+                .module(onboardingModule)
+                .moduleStatus(moduleStatus)
+                .vehicleEntity(vehicleEntity)
                 .build();
     }
 
