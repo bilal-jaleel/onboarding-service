@@ -8,6 +8,7 @@ import com.acme.onboarding.database.enums.OnboardingModule;
 import com.acme.onboarding.database.repository.DriverRepository;
 import com.acme.onboarding.database.repository.OnboardingRepository;
 import com.acme.onboarding.database.repository.VehicleRepository;
+import com.acme.onboarding.service.exceptions.ExternalServiceFailureException;
 import com.acme.onboarding.service.interfaces.IDriverOnboardingService;
 import com.acme.onboarding.service.interfaces.IExternalService;
 import com.acme.onboarding.service.model.Driver;
@@ -25,6 +26,7 @@ import java.util.List;
 @Slf4j
 public class DriverOnboardingService implements IDriverOnboardingService {
 
+    // TODO: Repositories can be abstracted into an interface for db calls
     @Autowired
     OnboardingRepository onboardingRepository;
 
@@ -65,7 +67,7 @@ public class DriverOnboardingService implements IDriverOnboardingService {
     }
 
     @Override
-    public void updateModuleStatus(int driverID, OnboardingModule module, ModuleStatus status) throws InterruptedException {
+    public void updateModuleStatus(int driverID, OnboardingModule module, ModuleStatus status) throws InterruptedException, ExternalServiceFailureException {
         OnboardingEntity currentDriverOnboardingEntity = onboardingRepository.getReferenceById(driverID);
 
         //If the status being updated is to in_progress, that is invalid
@@ -114,8 +116,9 @@ public class DriverOnboardingService implements IDriverOnboardingService {
         }
 
         if (retry >= 3){
-            log.error("External service for module: "+ module + " unreachable for driver with id: " + driverID);
-           throw new RuntimeException("There is some error processing your request");
+            String message = "External service for module: "+ module + " unreachable for driver with id: " + driverID ;
+            log.error(message);
+           throw new ExternalServiceFailureException(message);
         }
 
         onboardingRepository.updateModuleStatusForDriver(driverID, nextModule, ModuleStatus.IN_PROGRESS, completedModules);

@@ -8,6 +8,7 @@ import com.acme.onboarding.database.enums.OnboardingModule;
 import com.acme.onboarding.database.repository.DriverRepository;
 import com.acme.onboarding.database.repository.OnboardingRepository;
 import com.acme.onboarding.database.repository.VehicleRepository;
+import com.acme.onboarding.service.exceptions.ExternalServiceFailureException;
 import com.acme.onboarding.utils.TestData;
 import jakarta.validation.ValidationException;
 import com.acme.onboarding.service.implementation.DriverOnboardingService;
@@ -75,7 +76,7 @@ public class DriverServiceTests {
 
 
     @Test
-    void testUpdateDocumentCollectionSuccess() throws InterruptedException {
+    void testUpdateDocumentCollectionSuccess() throws InterruptedException, ExternalServiceFailureException {
 
         OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(1, OnboardingModule.DOCUMENT_COLLECTION, ModuleStatus.SUCCESS);
 
@@ -120,7 +121,7 @@ public class DriverServiceTests {
     }
 
     @Test
-    void testOnboardedModuleStatusUpdate() throws InterruptedException {
+    void testOnboardedModuleStatusUpdate() throws InterruptedException, ExternalServiceFailureException {
 
         OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(1, OnboardingModule.TRACKER_SHIPPING, ModuleStatus.IN_PROGRESS);
 
@@ -135,7 +136,7 @@ public class DriverServiceTests {
     }
 
     @Test
-    void testModuleFailureStatusUpdation() throws InterruptedException {
+    void testModuleFailureStatusUpdation() throws InterruptedException, ExternalServiceFailureException {
         OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(1, OnboardingModule.TRACKER_SHIPPING, ModuleStatus.IN_PROGRESS);
         int driverID = onboardingEntity.getId();
 

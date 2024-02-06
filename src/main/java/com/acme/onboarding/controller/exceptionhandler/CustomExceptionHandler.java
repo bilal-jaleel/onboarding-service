@@ -1,6 +1,7 @@
 package com.acme.onboarding.controller.exceptionhandler;
 
 import com.acme.onboarding.controller.response.GenericResponse;
+import com.acme.onboarding.service.exceptions.ExternalServiceFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @RestControllerAdvice
 public class CustomExceptionHandler {
+    // Any other exceptions will be caught by global spring exception handler
 
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<GenericResponse<String>> handleValidationException(ValidationException ex) {
@@ -35,5 +37,11 @@ public class CustomExceptionHandler {
     public ResponseEntity<GenericResponse<String>> handleRequestParamNotValidException(MissingServletRequestParameterException ex){
         GenericResponse<String> response = GenericResponse.<String>builder().data(ex.getMessage()).status(false).build();
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ExternalServiceFailureException.class)
+    public ResponseEntity<GenericResponse<String>> handleExternalServiceFailureException(MissingServletRequestParameterException ex){
+        GenericResponse<String> response = GenericResponse.<String>builder().data(ex.getMessage()).status(false).build();
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

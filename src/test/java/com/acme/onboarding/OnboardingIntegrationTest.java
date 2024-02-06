@@ -49,6 +49,7 @@ class OnboardingIntegrationTest {
 
         @Test
         @Order(1)
+        @DisplayName("Register a Driver")
         void testRegisterDriverSuccess() throws Exception {
             // Step 1: Register a driver
             RegisterDriverRequest registerDriverRequest = TestData.getRegisteredDriverRequest("Paul");
@@ -65,7 +66,9 @@ class OnboardingIntegrationTest {
 
         @Test
         @Order(2)
+        @DisplayName("Document Collection Successful")
         void testUpdateDocumentCollectionStatusSuccess() throws Exception {
+            // This is supposed to be done by the event handler after reading the message from kafka
 
             // Step 2: Update Document Collection Status as success
             UpdateModuleStatusRequest updateModuleRequest = TestData.getUpdateModuleStatusRequest(driverId, OnboardingModule.DOCUMENT_COLLECTION, ModuleStatus.SUCCESS);
@@ -78,6 +81,7 @@ class OnboardingIntegrationTest {
 
         @Test
         @Order(3)
+        @DisplayName("Background Verification Successful")
         void testUpdateBackgroundVerificationStatusSuccess() throws Exception {
 
             // Step 3: Update Background Verification Status as success
@@ -92,6 +96,7 @@ class OnboardingIntegrationTest {
 
         @Test
         @Order(4)
+        @DisplayName("Tracker Shipping Successful")
         void testUpdateTrackerShippingStatusSuccess() throws Exception {
             // Step 4: Update Tracker Shipping Status as success
             UpdateModuleStatusRequest updateModuleRequest = TestData.getUpdateModuleStatusRequest(driverId, OnboardingModule.TRACKER_SHIPPING, ModuleStatus.SUCCESS);
@@ -104,6 +109,7 @@ class OnboardingIntegrationTest {
 
         @Test
         @Order(5)
+        @DisplayName("Check Onboarding Status")
         void testGetOnboardingStatusSuccess() throws Exception {
 
 
@@ -120,6 +126,7 @@ class OnboardingIntegrationTest {
 
         @Test
         @Order(6)
+        @DisplayName("Mark Driver as Ready")
         void testMarkDriverReadySuccess() throws Exception {
             // Step 6: Mark driver as ready
             MarkDriverReadyRequest markDriverReadyRequest = new MarkDriverReadyRequest(driverId);

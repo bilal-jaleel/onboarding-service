@@ -6,6 +6,7 @@ import com.acme.onboarding.controller.request.UpdateModuleStatusRequest;
 import com.acme.onboarding.controller.response.GenericResponse;
 import com.acme.onboarding.controller.response.OnboardingStatusResponse;
 import com.acme.onboarding.database.entity.OnboardingEntity;
+import com.acme.onboarding.service.exceptions.ExternalServiceFailureException;
 import com.acme.onboarding.service.interfaces.IDriverOnboardingService;
 import com.acme.onboarding.service.model.Driver;
 import jakarta.validation.Valid;
@@ -54,7 +55,7 @@ public class OnboardingController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<GenericResponse<String>> updateModuleStatus(@RequestBody @Valid UpdateModuleStatusRequest updateModuleStatusRequest) throws InterruptedException {
+    public ResponseEntity<GenericResponse<String>> updateModuleStatus(@RequestBody @Valid UpdateModuleStatusRequest updateModuleStatusRequest) throws InterruptedException, ExternalServiceFailureException {
         driverOnboardingService.updateModuleStatus(updateModuleStatusRequest.id(), updateModuleStatusRequest.onboardingModule(), updateModuleStatusRequest.moduleStatus());
         return new ResponseEntity<>(new GenericResponse<>(true, "module status updated successfully"), HttpStatus.OK);
     }
