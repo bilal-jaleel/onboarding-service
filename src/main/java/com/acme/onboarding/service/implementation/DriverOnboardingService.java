@@ -90,7 +90,6 @@ public class DriverOnboardingService implements IDriverOnboardingService {
 
         // If the current module has failed, then update the status and return
         if (status == ModuleStatus.FAILED) {
-            log.info("Updating status of module " + module + " for driverId: " + driverID + " to failed");
             onboardingRepository.updateModuleStatusForDriver(driverID, module, status, currentDriverOnboardingEntity.getCompletedModules());
             return;
         }
@@ -141,14 +140,17 @@ public class DriverOnboardingService implements IDriverOnboardingService {
 
         // Move the onboarded driver to driver table
         driverRepository.save(driverEntity);
-        log.info("Marked Driver with id " + driverID + " as ready");
     }
 
     private boolean callServiceForModule(OnboardingModule module, Integer driverId) throws InterruptedException {
         return switch (module){
+            // Call Document Collection Service
             case DOCUMENT_COLLECTION -> externalService.documentCollection(driverId);
+            // Call Background Verification Service
             case BACKGROUND_VERIFICATION -> externalService.backgroundVerification(driverId);
+            // Call Tracker Shipping Service
             case TRACKER_SHIPPING -> externalService.trackerShipping(driverId);
+            // No more service to call, hence return true
             case ONBOARDED -> true;
         };
     }
