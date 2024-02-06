@@ -7,8 +7,8 @@ Welcome to the Driver Onboarding Application! This application is designed to st
 - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Build](#build)
+    - [Local Setup](#local-setup)
 - [Design](#design)
-- [Usage](#usage)
 
 
 ## Getting Started
