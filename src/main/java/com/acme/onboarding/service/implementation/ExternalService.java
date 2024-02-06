@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class ExternalService implements IExternalService {
 
-    private static final int timeout = 2;
+    private static final int timeout = 0;
 
     @Override
     public boolean documentCollection(Integer driverId) throws InterruptedException {

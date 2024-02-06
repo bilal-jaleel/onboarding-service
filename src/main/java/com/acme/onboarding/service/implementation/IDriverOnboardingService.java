@@ -9,7 +9,6 @@ import com.acme.onboarding.database.repository.DriverRepository;
 import com.acme.onboarding.database.repository.OnboardingRepository;
 import com.acme.onboarding.database.repository.VehicleRepository;
 import com.acme.onboarding.service.exceptions.ExternalServiceFailureException;
-import com.acme.onboarding.service.interfaces.IDriverOnboardingService;
 import com.acme.onboarding.service.interfaces.IExternalService;
 import com.acme.onboarding.service.model.Driver;
 import com.acme.onboarding.utils.Mapper;
@@ -19,12 +18,11 @@ import org.springframework.stereotype.Service;
 import jakarta.validation.ValidationException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
-public class DriverOnboardingService implements IDriverOnboardingService {
+public class IDriverOnboardingService implements com.acme.onboarding.service.interfaces.IDriverOnboardingService {
 
     // TODO: Repositories can be abstracted into an interface for db calls
     @Autowired
@@ -112,6 +110,7 @@ public class DriverOnboardingService implements IDriverOnboardingService {
 
         int retry = 0;
         while (retry < 3 && !callServiceForModule(nextModule, driverID)){
+            TimeUnit.SECONDS.sleep(1);
             retry++;
         }
 
@@ -147,14 +146,12 @@ public class DriverOnboardingService implements IDriverOnboardingService {
 
     private boolean callServiceForModule(OnboardingModule module, Integer driverId) throws InterruptedException {
         return switch (module){
-            // Call Document Collection Service
-            case DOCUMENT_COLLECTION -> externalService.documentCollection(driverId);
             // Call Background Verification Service
             case BACKGROUND_VERIFICATION -> externalService.backgroundVerification(driverId);
             // Call Tracker Shipping Service
             case TRACKER_SHIPPING -> externalService.trackerShipping(driverId);
             // No more service to call, hence return true
-            case ONBOARDED -> true;
+            default -> true;
         };
     }
 

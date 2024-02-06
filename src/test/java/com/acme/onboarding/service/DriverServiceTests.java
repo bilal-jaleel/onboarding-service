@@ -9,9 +9,10 @@ import com.acme.onboarding.database.repository.DriverRepository;
 import com.acme.onboarding.database.repository.OnboardingRepository;
 import com.acme.onboarding.database.repository.VehicleRepository;
 import com.acme.onboarding.service.exceptions.ExternalServiceFailureException;
+import com.acme.onboarding.service.interfaces.IExternalService;
 import com.acme.onboarding.utils.TestData;
 import jakarta.validation.ValidationException;
-import com.acme.onboarding.service.implementation.DriverOnboardingService;
+import com.acme.onboarding.service.implementation.IDriverOnboardingService;
 import com.acme.onboarding.service.model.Driver;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +41,10 @@ public class DriverServiceTests {
 
     @Autowired
     @InjectMocks
-    private DriverOnboardingService driverOnboardingService;
+    private IDriverOnboardingService driverOnboardingService;
+
+    @Mock
+    private IExternalService externalService;
 
 
     @Test
@@ -61,6 +65,17 @@ public class DriverServiceTests {
     }
 
     @Test
+    void testRegisterDriverInvalidVehicle() {
+        Driver driver = TestData.getDriver();
+
+        when(vehicleRepository.findByManufacturerAndModel(anyString(), anyString())).thenReturn(null);
+
+        assertThrows(ValidationException.class, () -> driverOnboardingService.register(driver));
+
+        verify(vehicleRepository, times(1)).findByManufacturerAndModel(anyString(), anyString());
+    }
+
+    @Test
     void testGetDriverOnboardingStatusSuccess() {
         OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(null, null, null);
 
@@ -78,12 +93,13 @@ public class DriverServiceTests {
     @Test
     void testUpdateDocumentCollectionSuccess() throws InterruptedException, ExternalServiceFailureException {
 
-        OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(1, OnboardingModule.DOCUMENT_COLLECTION, ModuleStatus.SUCCESS);
+        OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(1, OnboardingModule.DOCUMENT_COLLECTION, ModuleStatus.IN_PROGRESS);
 
         int driverID = onboardingEntity.getId();
 
         doNothing().when(pendingOnboardingRepository).updateModuleStatusForDriver(anyInt(), any(), any(), any());
         when(pendingOnboardingRepository.getReferenceById(driverID)).thenReturn(onboardingEntity);
+        when(externalService.backgroundVerification(anyInt())).thenReturn(true);
 
         driverOnboardingService.updateModuleStatus(driverID, OnboardingModule.DOCUMENT_COLLECTION, ModuleStatus.SUCCESS);
 
@@ -136,7 +152,7 @@ public class DriverServiceTests {
     }
 
     @Test
-    void testModuleFailureStatusUpdation() throws InterruptedException, ExternalServiceFailureException {
+    void testModuleFailureStatusUpdate() throws InterruptedException, ExternalServiceFailureException {
         OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(1, OnboardingModule.TRACKER_SHIPPING, ModuleStatus.IN_PROGRESS);
         int driverID = onboardingEntity.getId();
 
@@ -185,5 +201,21 @@ public class DriverServiceTests {
         assertThrows(ValidationException.class, () -> driverOnboardingService.markDriverReady(driverID));
 
         verify(pendingOnboardingRepository, times(1)).getReferenceById(driverID);
+    }
+
+    @Test
+    void testExternalServiceFailure() throws InterruptedException {
+
+        OnboardingEntity onboardingEntity = TestData.getOnboardingEntity(1, OnboardingModule.BACKGROUND_VERIFICATION, ModuleStatus.IN_PROGRESS);
+
+        int driverID = onboardingEntity.getId();
+
+        when(pendingOnboardingRepository.getReferenceById(driverID)).thenReturn(onboardingEntity);
+        doNothing().when(pendingOnboardingRepository).updateModuleStatusForDriver(anyInt(), any(), any(), any());
+        when(externalService.trackerShipping(anyInt())).thenReturn(false);
+
+        assertThrows(ExternalServiceFailureException.class, () -> driverOnboardingService.updateModuleStatus(driverID, OnboardingModule.BACKGROUND_VERIFICATION, ModuleStatus.SUCCESS));
+        verify(pendingOnboardingRepository, times(1)).getReferenceById(driverID);
+        verify(pendingOnboardingRepository, times(1)).updateModuleStatusForDriver(anyInt(), any(), any(), any());
     }
 }
