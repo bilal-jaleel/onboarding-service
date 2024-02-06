@@ -46,9 +46,9 @@ Before you begin, ensure you have the following installed:
 1. Run postgres container locally
 
 ```bash
- sudo podman run -v ./src/main/resources/init.sql:/docker-entrypoint-initdb.d/data.sql 
-                   -v /var/lib/postgres-container/:/var/lib/postgresql/data
-                   -p 5432:5432  -e POSTGRES_PASSWORD=password -d postgres
+sudo podman run -v ./src/main/resources/init.sql:/docker-entrypoint-initdb.d/data.sql 
+                -v /var/lib/postgres-container/:/var/lib/postgresql/data
+                -p 5432:5432  -e POSTGRES_PASSWORD=password -d postgres 
 ```
 
 2. Run the following command to start the application
